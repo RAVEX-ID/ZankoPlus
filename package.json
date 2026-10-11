@@ -1,7 +1,7 @@
 {
   "name": "zankoplus",
   "version": "1.0.0",
-  "description": "\u0632\u0627\u0646\u06a9\u06c6\u067e\u0644\u06d5\u0633 \u2014 learning platform for grades 10\u201312 (Kurdistan Region)",
+  "description": "زانکۆپلەس — learning platform for grades 10–12 (Kurdistan Region)",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^13.0.3",
     "cookie-parser": "^1.4.7",
     "dotenv": "^18.0.6",
     "express": "^5.2.1",
@@ -21,6 +20,6 @@
   },
   "private": true,
   "engines": {
-    "node": ">=22"
+    "node": ">=22.13"
   }
 }
