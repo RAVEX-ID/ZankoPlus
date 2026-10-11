@@ -1,17 +1,21 @@
 'use strict';
 
+/**
+ * SQLite via Node's built-in `node:sqlite` (Node 22.13+) — no native add-on to compile,
+ * so it runs identically on any host. The tiny wrapper below keeps the prepare/exec/transaction
+ * API the services use.
+ */
 const fs = require('fs');
 const path = require('path');
-const Database = require('better-sqlite3');
+const { DatabaseSync } = require('node:sqlite');
 const { databaseFile } = require('./config');
 
 if (databaseFile !== ':memory:') fs.mkdirSync(path.dirname(databaseFile), { recursive: true });
 
-const db = new Database(databaseFile);
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+const database = new DatabaseSync(databaseFile);
+database.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
 
-db.exec(`
+database.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     email          TEXT NOT NULL UNIQUE COLLATE NOCASE,
@@ -43,4 +47,23 @@ db.exec(`
   );
 `);
 
-module.exports = db;
+/** Wraps `fn` so every call runs inside one transaction (rolled back if it throws). */
+function transaction(fn) {
+  return (...args) => {
+    database.exec('BEGIN IMMEDIATE');
+    try {
+      const result = fn(...args);
+      database.exec('COMMIT');
+      return result;
+    } catch (error) {
+      database.exec('ROLLBACK');
+      throw error;
+    }
+  };
+}
+
+module.exports = {
+  prepare: (sql) => database.prepare(sql),
+  exec: (sql) => database.exec(sql),
+  transaction,
+};

@@ -1,5 +1,7 @@
 'use strict';
 
+console.log(`[boot] Node ${process.version}`);
+
 const app = require('./app');
 const config = require('./config');
 
